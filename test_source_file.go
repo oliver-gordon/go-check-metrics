@@ -17,3 +17,8 @@ func aPrivateFunction1(a int) int {
 func aPrivateFunction2(a int) int {
 	return a + 1
 }
+
+// a private function 2
+func aPrivateFunction3(a int) int {
+	return a + 1
+}

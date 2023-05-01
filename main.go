@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -9,16 +8,24 @@ import (
 
 // Get basic metrics for source files
 // lines of code in a file
-// if func is commented
+// if public func is commented
+// If public struct is commented
 
 type FuncMetrics struct {
-	Function    string
-	LOC         int
-	HasComments bool
+	Function    string // name of function decl
+	LOC         int    // how many lines of code for this function
+	Public      bool   // Is function decl public
+	HasComments bool   // is function commented with // doc before func declaration
 }
 
 type LoCMetrics struct {
-	Functions []FuncMetrics
+	Functions                 []FuncMetrics //slice of all Funcetric structs for a file
+	CommentCoverageAsAPercent float32
+}
+
+type StructMetrics struct {
+	Struct      string //name of struct
+	HasComments bool   // is function commented with // doc before func declaration
 }
 
 func main() {
@@ -47,10 +54,26 @@ func main() {
 			},
 			)
 		}
+		if _, ok := n.(*ast.StructType); ok {
+			if !ok {
+				return true
+			}
+		}
 		return true
 	})
 
+	var noComments float32
 	for _, v := range lm.Functions {
-		fmt.Println(v.Function, v.HasComments, v.LOC)
+		if v.HasComments == false {
+			noComments += 1
+		}
 	}
+	lm.CommentCoverageAsAPercent = calculatePercentage(
+		float32(noComments), float32(len(lm.Functions)),
+	)
+}
+
+// Calculate what percentage argument a is of argument b
+func calculatePercentage(a, b float32) float32 {
+	return (a / b) * 100
 }
